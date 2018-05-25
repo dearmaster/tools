@@ -1,0 +1,53 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:batch="http://www.springframework.org/schema/batch"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		  http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch-3.0.xsd">
+
+    <import resource="application_batch_report.xml"/>
+
+    <batch:job id="auditReportGenerationJob" job-repository="jobRepository">
+        <batch:step id="auditReportGenerationStep">
+            <batch:tasklet>
+                <batch:chunk reader="auditReportItemReader" writer="auditReportItemWriter" commit-interval="1"
+                             skip-limit="5">
+                    <batch:skippable-exception-classes>
+                        <batch:include class="java.lang.Exception"/>
+                    </batch:skippable-exception-classes>
+                </batch:chunk>
+                <batch:listeners>
+                    <batch:listener ref="auditReportGenerationStepListener"/>
+                    <batch:listener ref="auditReportGenerationItemListener"/>
+                </batch:listeners>
+            </batch:tasklet>
+        </batch:step>
+        <batch:listeners>
+            <batch:listener ref="auditReportGenerationJobListener"/>
+        </batch:listeners>
+    </batch:job>
+
+    <bean id="auditReportItemReader" class="com.master.report.batch.reader.AuditReportItemReader">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="rowMapper">
+            <bean class="com.master.report.batch.rowmapper.AuditReportItemRowMapper"/>
+        </property>
+        <property name="sql">
+            <value>
+                select id, username from t_batch_test_user
+            </value>
+        </property>
+    </bean>
+
+    <bean id="auditReportItemWriter" class="com.master.report.batch.writer.AuditReportItemWriter"/>
+
+    <bean id="auditReportGenerationItemListener"
+          class="com.master.report.batch.listener.AuditReportGenerationItemListener"/>
+
+    <bean id="auditReportGenerationStepListener"
+          class="com.master.report.batch.listener.AuditReportGenerationStepListener"/>
+
+    <bean id="auditReportGenerationJobListener"
+          class="com.master.report.batch.listener.AuditReportGenerationJobListener"/>
+
+
+</beans>

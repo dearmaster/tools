@@ -1,0 +1,7 @@
+drop table T_BATCH_TEST_USER if exists;
+
+create table T_BATCH_TEST_USER(
+    ID  BIGINT IDENTITY NOT NULL PRIMARY KEY ,
+    USERNAME VARCHAR(20) NOT NULL,
+    constraint USER_NAME_UN unique (USERNAME)
+);
